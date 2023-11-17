@@ -1,0 +1,14 @@
+---
+
+kind: Service
+apiVersion: v1
+metadata: 
+    name: {{ template "func.fullname" . }}
+spec:
+    type: ClusterIP
+    selector: 
+        app: {{ template "func.fullname" . }}-app
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: {{ .Values.func.route.containerPort }}

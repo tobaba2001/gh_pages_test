@@ -1,0 +1,46 @@
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "func.fullname" . }}
+  labels:
+    {{- include "func.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.func.replicas }}
+  selector:
+    matchLabels:
+      {{- include "func.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "func.labels" . | nindent 8 }}
+    spec:
+      securityContext:
+        runAsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: {{ template "func.fullname" . }}-func
+          image: {{ .Values.func.image }}:1.0.1
+          imagePullPolicy: IfNotPresent
+          args:
+          {{- range .Values.func.args }}
+            - {{ quote . }}
+          {{- end }}
+          ports:
+            - name: {{ .Values.func.route.portName }}
+              containerPort: {{ .Values.func.route.containerPort }}
+              protocol: "TCP"
+          resources: {{ toYaml .Values.func.resources | nindent 12 }}
+          readinessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              port: {{ .Values.func.route.portName }}
+              path: /
+          livenessProbe:
+            initialDelaySeconds: 10
+            exec:
+              command:
+                - /bin/sh
+                - c
+                - 'pidof -x {{ .Values.func.route.portName }}'

@@ -1,0 +1,8 @@
+apiVersion: v2
+name: hello-github-pages
+description: Flask application to see how pages work
+version: 1.0.0
+appVersion: 1.0.0
+annotations:
+  layer: "frontend"
+  log_format: "json"
